@@ -3,12 +3,10 @@ from slack_bolt.adapter.socket_mode import SocketModeHandler
 from dotenv import load_dotenv
 import os
 
-
 load_dotenv()
 
-# Debug: Print tokens (masked for security)
-bot_token = os.getenv("SLACK_BOT_TOKEN")
-app_token = os.getenv("SLACK_APP_TOKEN")
+bot_token = os.getenv("SLACK_BOT")
+app_token = os.getenv("SLACK_APP")
 print(f"Bot token loaded: {'Yes' if bot_token else 'No'}")
 print(f"App token loaded: {'Yes' if app_token else 'No'}")
 
