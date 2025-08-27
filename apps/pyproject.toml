@@ -1,0 +1,33 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "compli"
+version = "0.1.0"
+description = ""
+authors = ["Mark <something@gmail.com>"]
+packages = [{include = "*", from = "apps"}]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = ">=3.11"
+fastapi = ">=0.115.0"
+uvicorn = {extras = ["standard"], version = ">=0.32.0"}
+httpx = ">=0.28.0"
+pydantic = ">=2.10.0"
+python-dotenv = ">=1.0.0"
+psycopg = {extras = ["binary"], version = ">=3.2.9"}
+slack-bolt = ">=1.21.0"
+slack-sdk = ">=3.33.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=8.3.0"
+pytest-asyncio = ">=0.23.0"
+pytest-cov = ">=4.0.0"
+black = ">=24.0.0"
+isort = ">=5.13.0"
+flake8 = ">=7.0.0"
+mypy = ">=1.8.0"
+
+
