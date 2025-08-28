@@ -17,9 +17,9 @@ def handle_app_mention(body, say):
     print("App mention received!")
     try:
         say("Compli responded")
-        print("✅ Response sent successfully!")
+        print("[SUCCESS] Response sent successfully!")
     except Exception as e:
-        print(f"❌ Error sending response: {e}")
+        print(f"[ERROR] Error sending response: {e}")
 
 
 if __name__ == "__main__":
