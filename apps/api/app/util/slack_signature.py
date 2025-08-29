@@ -37,7 +37,7 @@ def verify_slack_signatures(signing_secret: str,
       status_code=401,
       detail="Invalid Slack timestamp"
     )
-  if abs(time.time() - ts_int) > DEFAULT_TOLERANCE_SECONDS:
+  if abs(time.time() - ts_int) > tolerance_seconds:
     raise HTTPException(
       status_code=401,
       detail="Stale Slack request"
@@ -51,3 +51,4 @@ def verify_slack_signatures(signing_secret: str,
       status_code=401,
       detail="Invalid Slack signature"
     )
+
