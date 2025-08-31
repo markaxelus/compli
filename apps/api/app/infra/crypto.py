@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 import hmac, hashlib, time
 import logging
-from ..core.settings import DEFAULT_TOLERANCE_SECONDS
+from .settings import DEFAULT_TOLERANCE_SECONDS
 
 SLACK_VERSION = 'v0'
 
@@ -15,6 +15,13 @@ Performs two security checks:
 1. HMAC-SHA256 signature verification with signing secret
 2. Timestamp freshness check to prevent replay atttacks
 """
+
+def _signature_base(timestamp: str, raw: bytes) -> bytes:
+  return SLACK_VERSION.encode() + b":" + timestamp.encode() + b":" + raw
+
+def compute_slack_signature(timestamp: str, raw: bytes, signing_secret: str) -> str:
+  digest = hmac.new(signing_secret.encode(), _signature_base(timestamp, raw), hashlib.sha256).hexdigest()
+  return f"{SLACK_VERSION}={digest}"
 
 def verify_slack_signatures(signing_secret: str, 
                             x_slack_signature: str, 
@@ -43,12 +50,11 @@ def verify_slack_signatures(signing_secret: str,
       detail="Stale Slack request"
     )
   
-  base = f"{SLACK_VERSION}:{x_slack_request_timestamp}:{raw_body.decode('utf-8')}".encode('utf-8')
-  digest = hmac.new(signing_secret.encode('utf-8'), base, hashlib.sha256).hexdigest()
-  expected = f"{SLACK_VERSION}={digest}"
+  expected = compute_slack_signature(x_slack_request_timestamp, raw_body, signing_secret)
   if not hmac.compare_digest(expected, x_slack_signature):
     raise HTTPException(
       status_code=401,
       detail="Invalid Slack signature"
     )
+
 

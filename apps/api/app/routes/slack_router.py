@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Request, Header, BackgroundTasks
 from fastapi.responses import JSONResponse
 import json
-from ..util.slack_signature import verify_slack_signatures
-from ..core.settings import SLACK_SIGNING_SECRET
+from ..infra.crypto import verify_slack_signatures
+from ..infra.settings import SLACK_SIGNING_SECRET
 
 router = APIRouter()
 
