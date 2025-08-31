@@ -1,9 +1,9 @@
 from fastapi import HTTPException
 import hmac, hashlib, time
 import logging
+from ..core.settings import DEFAULT_TOLERANCE_SECONDS
 
 SLACK_VERSION = 'v0'
-DEFAULT_TOLERANCE_SECONDS = 300 # 5m as recommended by slack
 
 
 logger = logging.getLogger(__name__)
@@ -17,22 +17,22 @@ Performs two security checks:
 """
 
 def verify_slack_signatures(signing_secret: str, 
-                            slack_signature: str | None, 
-                            slack_timestamp: str | None, 
+                            x_slack_signature: str, 
+                            x_slack_request_timestamp: str, 
                             raw_body: bytes, 
                             tolerance_seconds: int = DEFAULT_TOLERANCE_SECONDS) -> None:
   if not signing_secret:
     raise RuntimeError("SLACK_SIGNING_SECRET not found")
-  if not slack_signature or not slack_timestamp:
+  if not x_slack_signature or not x_slack_request_timestamp:
     raise HTTPException(
       status_code=401, 
       detail="Missing Slack signature headers"
     )
   
   try:
-    ts_int = int(slack_timestamp)
+    ts_int = int(x_slack_request_timestamp)
   except (ValueError, TypeError):
-    logger.warning(f"Invalid timestamp format: {slack_timestamp}")
+    logger.warning(f"Invalid timestamp format: {x_slack_request_timestamp}")
     raise HTTPException(
       status_code=401,
       detail="Invalid Slack timestamp"
@@ -43,10 +43,10 @@ def verify_slack_signatures(signing_secret: str,
       detail="Stale Slack request"
     )
   
-  base = f"{SLACK_VERSION}:{slack_timestamp}:{raw_body.decode('utf-8')}".encode('utf-8')
+  base = f"{SLACK_VERSION}:{x_slack_request_timestamp}:{raw_body.decode('utf-8')}".encode('utf-8')
   digest = hmac.new(signing_secret.encode('utf-8'), base, hashlib.sha256).hexdigest()
   expected = f"{SLACK_VERSION}={digest}"
-  if not hmac.compare_digest(expected, slack_signature):
+  if not hmac.compare_digest(expected, x_slack_signature):
     raise HTTPException(
       status_code=401,
       detail="Invalid Slack signature"
